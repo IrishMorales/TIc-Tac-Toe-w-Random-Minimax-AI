@@ -1,17 +1,27 @@
-def initialize():
-    global board
-    global turn
-    global end_game
-    board = [[1,2,3],
-             [4,5,6],
-             [7,8,9]]
-    turn = 1
-    end_game = False
+def print_intro():
+    print(
+'''
+
+ ______   __    ______     ______   ______    ______     ______   ______    ______    
+/\__  _\ /\ \  /\  ___\   /\__  _\ /\  __ \  /\  ___\   /\__  _\ /\  __ \  /\  ___\   
+\/_/\ \/ \ \ \ \ \ \____  \/_/\ \/ \ \  __ \ \ \ \____  \/_/\ \/ \ \ \/\ \ \ \  __\   
+   \ \_\  \ \_\ \ \_____\    \ \_\  \ \_\ \_\ \ \_____\    \ \_\  \ \_____\ \ \_____\ 
+    \/_/   \/_/  \/_____/     \/_/   \/_/\/_/  \/_____/     \/_/   \/_____/  \/_____/ 
+                                                                                         
+                                       BASE GAME
+                               By Irish Danielle Morales
+                        Originally made with Jarod Angelo Lustre
+
+                           Welcome to the game of Tic Tac Toe!
+''')
+
+
+def print_sep():
+    print("\n<====================================================================================>\n")
 
 
 def print_board():
-    #separator
-    print("\n<===============================>\n")
+    print_sep()
 
     #prints line at top of board
     print("o-----------o")
@@ -25,7 +35,7 @@ def print_board():
         print(row)
 
         #prints lines inside board or line at bottom of board
-        print("|-----------|") if row_index!=2 else print("o-----------o")
+        print("|-----------|") if row_index!=2 else print("o-----------o\n")
         row_index+=1
         
         '''
@@ -73,10 +83,12 @@ def check_if_valid_cell(cell):
             return True
         else:
             cell = print("That cell is already taken! Please input a valid cell number.")
+            return False
 
     #runs if input is not a number
     else:
         cell = print("Sorry, that's not a valid number! Please input a number from 1 to 9.")
+        return False
 
         
 def set_board_row(cell):
@@ -95,8 +107,8 @@ def set_board_col(cell):
          return (cell%3)-1
 
 
-def check_if_empty_cell(b, row, col):
-    if b >= 1 and b <= 9 and board[row][col]!="O" and board[row][col]!="X":
+def check_if_empty_cell(cell, row, col):
+    if cell >= 1 and cell <= 9 and board[row][col]!="O" and board[row][col]!="X":
         return True
     else:
         return False
@@ -115,9 +127,9 @@ def win():
         board[0][0]==board[1][1]==board[2][2] or
         board[0][2]==board[1][1]==board[2][0]):
         
-        #If any of the combinations are true, the current player wins
+        #If any of the combinations are true, the last player to move wins
         print_board()
-        print("Player", turn, "has won the game! Congratulations!")
+        print("Player", switch_turn(turn), "has won the game! Congratulations!")
         return True
     
     else:
@@ -125,71 +137,66 @@ def win():
 
 
 def tie():
+    is_tie = True
+    
     #checks if any number exists in board
     #if any number exists in board, board is not tied
-    isTie=True
     for a in range(1, 10):
         for row in board:
             if a in row:
-                isTie=False
+                is_tie = False
                 return False
 
-    if isTie:
+    #runs if board is tied
+    if is_tie:
+        print_board()
         print("The game has ended in a tie!")
-    return True
+        return True
+
+
+def switch_turn(turn):
+    #switches turn from 1 to 2 and vice versa
+    if turn == 1:
+        turn+=1
+    else:
+        turn-=1
+        
+    return turn
 
 
 def ask_replay():
-    response=input("Game Over! Do you want to play again? (Y/N): ")
+    print_sep()
+    response = input("Game Over! Do you want to play again? (Y/N): ")
 
-    while(response!="Y" and response!="N"):
+    #while response is invalid, keep asking for input
+    while(response != "Y" and response != "N"):
         print("Please input Y to replay and N to stop playing.")
         response=input("Do you want to play again? (Y/N): ")
 
-    if response=="Y":
+    if response == "Y":
         return True
     else:
         print("Thank you for playing!")
         return False
 
-
-def ask_AI():
-    response=input("Play against advanced AI? (Y/N): ")
     
-    while (response!="Y" and response!="N"):
-        print("Please input Y to play against the AI and N to play with a friend.")
-        response=input("Play against advanced AI? (Y/N): ")
-
-    if response=="Y":
-        print("You are now playing with advanced AI!")
-        return True
-    else:
-        print("You are now playing with a friend!")
-        return False
-
-
-
 #DRIVER PROGRAM====================================================================
+
+print_intro()
 replay = True
 
 while replay == True:
-    initialize()
+    #resets variables
+    board = [[1,2,3],
+             [4,5,6],
+             [7,8,9]]
+    turn = 1
 
-    #NEED: lacks else for ask_AI
-    #NEED: print board if win
-    if ask_AI() == False:
-        while end_game == False:
-            print_board()
-            choose_cell()
-
-            end_game=win()
-            if end_game==False:
-                end_game=tie()
+    #actual game
+    while (win() or tie()) == False:
+        print_board()
+        choose_cell()
+        turn = switch_turn(turn)
             
-            if turn==1:
-                turn+=1
-            else:
-                turn-=1
-
-    #Ask to replay
-    replay=ask_replay()
+    #asks to replay
+    replay = ask_replay()
