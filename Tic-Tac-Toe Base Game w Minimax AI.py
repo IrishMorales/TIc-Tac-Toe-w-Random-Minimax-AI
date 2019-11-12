@@ -10,7 +10,7 @@ def print_intro():
                                                                                          
                                  BASE GAME + MINIMAX AI
                                By Irish Danielle Morales
-                        Originally made with Jarod Angelo Lustre
+                        Originally made with Jarod Anjelo Lustre
 
                            Welcome to the game of Tic Tac Toe!
 ''')

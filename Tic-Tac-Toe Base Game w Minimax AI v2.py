@@ -1,5 +1,3 @@
-import random
-
 def print_intro():
     print(
 '''
@@ -10,7 +8,7 @@ def print_intro():
    \ \_\  \ \_\ \ \_____\    \ \_\  \ \_\ \_\ \ \_____\    \ \_\  \ \_____\ \ \_____\ 
     \/_/   \/_/  \/_____/     \/_/   \/_/\/_/  \/_____/     \/_/   \/_____/  \/_____/ 
                                                                                          
-                                 BASE GAME + RANDOM AI
+                                 BASE GAME + MINIMAX AI
                                By Irish Danielle Morales
                         Originally made with Jarod Anjelo Lustre
 
@@ -81,7 +79,7 @@ def check_if_valid_cell(cell):
         cell=int(cell)
 
         #checks if input cell is empty
-        if check_if_empty_cell(cell, set_board_row(cell), set_board_col(cell)) == True:
+        if cell in find_avail_cells():
             return True
         else:
             return False
@@ -105,13 +103,6 @@ def set_board_col(cell):
          return 2
     else:
          return (cell%3)-1
-
-
-def check_if_empty_cell(cell, row, col):
-    if cell >= 1 and cell <= 9 and board[row][col]!="O" and board[row][col]!="X":
-        return True
-    else:
-        return False
 
     
 def win():
@@ -137,21 +128,14 @@ def win():
 
 
 def tie():
-    is_tie = True
-    
-    #checks if any number exists in board
-    #if any number exists in board, board is not tied
-    for a in range(1, 10):
-        for row in board:
-            if a in row:
-                is_tie = False
-                return False
-
     #runs if board is tied
-    if is_tie:
+    if not find_avail_cells():
         print_board()
         print("The game has ended in a tie!")
         return True
+        
+    else:
+        return False
 
 
 def switch_turn(turn):
@@ -181,15 +165,15 @@ def ask_replay():
 
 
 def ask_ai():
-    response = input("Play with Random AI? (Y/N): ")
+    response = input("Play with Minimax AI? (Y/N): ")
 
     #while response is invalid, keep asking for input
     while(response != "Y" and response != "N"):
-        print("Please input Y to play with Random AI and N to play with a friend.")
-        response = input("Play with Random AI? (Y/N): ")
+        print("Please input Y to play with Minimax AI and N to play with a friend.")
+        response = input("Play with Minimax AI? (Y/N): ")
 
     if response == "Y":
-        print("You are now playing with Random AI!")
+        print("You are now playing with Minimax AI!")
         return True
     else:
         print("You are now playing with a friend!")
@@ -201,7 +185,7 @@ def move_player_first():
 
     #while response is invalid, keep asking for input
     while(response != "Y" and response != "N"):
-        print("Please input Y to move first and N to let Random AI move first.")
+        print("Please input Y to move first and N to let Minimax AI move first.")
         response = input("Would you like to make the first move? (Y/N): ")
 
     if response == "Y":
@@ -212,20 +196,26 @@ def move_player_first():
         return False
 
     
-def random_ai():
-    cell = random.randint(1,9)
-    
-    #while chosen cell is invalid, keep choosing random cell
-    while check_if_empty_cell(cell, set_board_row(cell), set_board_col(cell)) == False:
-        cell = random.randint(1,9)
+def minimax_ai():
+    #choose cell
 
-    print("Player ", turn, " (Random AI) made a move on cell ", cell, "!", sep="")
+    print("Player ", turn, " (Minimax AI) made a move on cell ", cell, "!", sep="")
 
-    #sets cell to X or O depending on turn (P1 = 'X', P2 = 'O')    
+    #sets cell to X or O depending on turn (P1 = 'X', P2 = 'O')
     if turn == 1:
         board[set_board_row(cell)][set_board_col(cell)]= "X"
     else:
         board[set_board_row(cell)][set_board_col(cell)]= "O"
+        
+        
+def find_avail_cells():
+    avail_cells = []
+    
+    for cell in range(1, 10):
+        if cell >= 1 and cell <= 9 and board[set_board_row(cell)][set_board_col(cell)]!="O" and board[set_board_row(cell)][set_board_col(cell)]!="X":
+            avail_cells.append(cell)
+            
+    return avail_cells
 
         
 #DRIVER PROGRAM====================================================================
@@ -244,10 +234,11 @@ while replay == True:
     if ask_ai() == False:
         while (win() or tie()) == False:
             print_board()
+            find_avail_cells()
             choose_cell()
             turn = switch_turn(turn)
 
-    #actual game if playing with Random AI
+    #actual game if playing with Minimax AI
     else:
         #game if player moves first
         if move_player_first() == True:
@@ -261,20 +252,20 @@ while replay == True:
                 if (win() or tie()) == True:
                     break
 
-                #random ai move
+                #minimax ai move
                 print_board()
-                random_ai()            
+                minimax_ai()
                 turn = switch_turn(turn)
 
         #game if player moves last
         else:
             while (win() or tie()) == False:
-                #random ai move
+                #minimax ai move
                 print_board()
-                random_ai()            
+                minimax_ai()            
                 turn = switch_turn(turn)
 
-                #checks for win or tie after random ai move
+                #checks for win or tie after minimax ai move
                 if (win() or tie()) == True:
                     break
                 
