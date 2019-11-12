@@ -1,0 +1,9 @@
+(Amazing) ASCII title art:
+Font Name: Sub-Zero
+Made with: http://patorjk.com/software/taag/
+
+Icon for executables:
+Title: Fun Icon Png #384008
+Source: https://icon-library.net/icon/fun-icon-png-11.html 
+License: CC0 Public Domain License
+Read about the CC0 Public Domain License at https://creativecommons.org/publicdomain/zero/1.0/
