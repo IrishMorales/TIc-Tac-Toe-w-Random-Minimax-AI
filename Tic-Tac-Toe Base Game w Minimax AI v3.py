@@ -64,22 +64,23 @@ def choose_cell():
     while check_if_valid_cell(cell) == False:
         cell = input("Invalid input! Please enter a valid cell to make a move on. (1-9): ")
 
-    cell=int(cell)
-
+    mark_cell(int(cell), turn)
+    
+    
+def mark_cell(cell, turn):
     #sets cell to X or O depending on turn (P1 = 'X', P2 = 'O')    
     if turn == 1:
-        board[set_board_row(cell)][set_board_col(cell)]= "X"
+        board[set_board_row(cell)][set_board_col(cell)] = "X"
     else:
-        board[set_board_row(cell)][set_board_col(cell)]= "O"
+        board[set_board_row(cell)][set_board_col(cell)] = "O"
 
 
 def check_if_valid_cell(cell):
     #checks and runs if input is a number
     if cell.isdigit():
-        cell=int(cell)
 
         #checks if input cell is empty
-        if cell in find_avail_cells():
+        if int(cell) in find_avail_cells():
             return True
         else:
             return False
@@ -117,23 +118,8 @@ def win():
         #Diagonal combinations
         board[0][0]==board[1][1]==board[2][2] or
         board[0][2]==board[1][1]==board[2][0]):
-        
-        #If any of the combinations are true, the last player to move wins
-        print_board()
-        print("Player", switch_turn(turn), "has won the game! Congratulations!")
         return True
     
-    else:
-        return False
-
-
-def tie():
-    #runs if board is tied
-    if not find_avail_cells():
-        print_board()
-        print("The game has ended in a tie!")
-        return True
-        
     else:
         return False
 
@@ -144,7 +130,7 @@ def switch_turn(turn):
         turn+=1
     else:
         turn-=1
-        
+    
     return turn
 
 
@@ -180,7 +166,7 @@ def ask_ai():
         return False
 
 
-def move_player_first():
+def ask_player_first():
     response = input("Would you like to make the first move? (Y/N): ")
 
     #while response is invalid, keep asking for input
@@ -189,77 +175,73 @@ def move_player_first():
         response = input("Would you like to make the first move? (Y/N): ")
 
     if response == "Y":
-        print("You are now Player 1! You will now move first.")
+        print("You will now move first.")
         return True
     else:
-        print("You are now Player 2! You will now move last.")
+        print("You will now move last.")
         return False
 
     
 def minimax_ai():
-    cell = 0
+    best_val = -100
+    best_cell = 0
     
-    for each cell in board:
-        if current_cell is better than cell:
-            cell = current_cell
-    #choose cell
+    #iterate over cells
+    for cell in range(1, 10):
+        #if cell is empty:
+        if cell in find_avail_cells():
+            #mark cell
+            mark_cell(cell, 2)
+            #minimax on cell
+            cell_val = minimax(0, False)
+            #reset cell
+            board[set_board_row(cell)][set_board_col(cell)] = cell
+            
+            if cell_val > best_val:
+                best_cell = cell
+                best_val = cell_val
 
-    print("Player ", turn, " (Minimax AI) made a move on cell ", cell, "!", sep="")
-
-    #sets cell to X or O depending on turn (P1 = 'X', P2 = 'O')
-    if turn == 1:
-        board[set_board_row(cell)][set_board_col(cell)]= "X"
-    else:
-        board[set_board_row(cell)][set_board_col(cell)]= "O"
+    print("Player 2 (Minimax AI) made a move on cell ", best_cell, "!", sep="")
+    mark_cell(best_cell, 2)
         
         
 def minimax(depth, isMaximizing):
     #if at terminal state, evaluate
-    if not find_avail_cells():
+    if win() or not find_avail_cells():
         #subtract depth
-        if eval_terminal() == 10:
-            return eval_terminal() - depth
-        elif eval_terminal() == -10:
-            return eval_terminal() + depth
+        if eval_terminal(not isMaximizing) == 10:
+            return eval_terminal(not isMaximizing) - depth
+        elif eval_terminal(not isMaximizing) == -10:
+            return eval_terminal(not isMaximizing) + depth
         else:
-            return eval_terminal
+            return eval_terminal(not isMaximizing)
             
     #if maximizing
     if isMaximizing:
         best_val = -100
-        for cell in board:
-            if cell in find_avail_cells() {
+        for cell in range(1, 10):
+            if cell in find_avail_cells():
                 initcell = board[set_board_row(cell)][set_board_col(cell)]
             
-                #set to AI's move
-                if (playerFirst):
-                    board[set_board_row(cell)][set_board_col(cell)] = "O"
-                else:
-                    board[set_board_row(cell)][set_board_col(cell)] = "X"
+                mark_cell(cell, isMaximizing+1)
                     
-                best_val = max(best_val, minimax(depth+1, false))
+                best_val = max(best_val, minimax(depth+1, not isMaximizing))
                 
                 board[set_board_row(cell)][set_board_col(cell)] = initcell
-            }
         return best_val
         
     #if minimizing
     else:
         best_val = 100
-        for cell in board:
-            if cell in find_avail_cells() {
+        for cell in range(1, 10):
+            if cell in find_avail_cells():
                 initcell = board[set_board_row(cell)][set_board_col(cell)]
             
-                #set to player's move
-                if (playerFirst):
-                    board[set_board_row(cell)][set_board_col(cell)] = "X"
-                else:
-                    board[set_board_row(cell)][set_board_col(cell)] = "O"
+                mark_cell(cell, isMaximizing+1)
                     
-                best_val = min(best_val, minimax(depth+1, true))
+                best_val = min(best_val, minimax(depth+1, not isMaximizing))
                 
                 board[set_board_row(cell)][set_board_col(cell)] = initcell
-            }
         return best_val
         
         
@@ -267,21 +249,21 @@ def find_avail_cells():
     avail_cells = []
     
     for cell in range(1, 10):
-        if cell >= 1 and cell <= 9 and board[set_board_row(cell)][set_board_col(cell)]!="O" and board[set_board_row(cell)][set_board_col(cell)]!="X":
+        if board[set_board_row(cell)][set_board_col(cell)]!="O" and board[set_board_row(cell)][set_board_col(cell)]!="X":
             avail_cells.append(cell)
             
     return avail_cells
     
     
-def eval_terminal():
+def eval_terminal(isMaximizing):
     if win():
-        #if human player won
-        if (switch_turn(turn) == 1 and playerFirst) or (switch_turn(turn) == 2 and not playerFirst):
-            return -10
         #if AI won
-        else:
+        if isMaximizing:
             return 10
-    elif tie():
+        #if player won
+        else:
+            return -10
+    elif not find_avail_cells():
         return 0
 
         
@@ -299,25 +281,23 @@ while replay == True:
 
     #actual game if playing without AI
     if ask_ai() == False:
-        while (win() or tie()) == False:
+        while not win() and find_avail_cells():
             print_board()
-            find_avail_cells()
             choose_cell()
             turn = switch_turn(turn)
 
     #actual game if playing with Minimax AI
     else:
-        playerFirst = move_player_first()
         #game if player moves first
-        if playerFirst:
-            while (win() or tie()) == False:
+        if ask_player_first():
+            while not win() and find_avail_cells():
                 #player move
                 print_board()
                 choose_cell()
                 turn = switch_turn(turn)
 
                 #checks for win or tie after player move
-                if (win() or tie()) == True:
+                if win() or not find_avail_cells():
                     break
 
                 #minimax ai move
@@ -327,20 +307,28 @@ while replay == True:
 
         #game if player moves last
         else:
-            while (win() or tie()) == False:
+            turn = 2
+            while not win() and find_avail_cells():
                 #minimax ai move
                 print_board()
                 minimax_ai()            
                 turn = switch_turn(turn)
 
                 #checks for win or tie after minimax ai move
-                if (win() or tie()) == True:
+                if win() or not find_avail_cells():
                     break
                 
                 #player move
                 print_board()
                 choose_cell()
                 turn = switch_turn(turn)
+
+    print_board()
+    
+    if win():
+        print("Player", switch_turn(turn), "has won the game! Congratulations!")
+    else:
+        print("The game has ended in a tie!")
     
     #asks to replay
     replay = ask_replay()
